@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Test MBTI - CareerBot{% endblock %}
+{% block extra_head %}
+<style>
+    .option-btn { transition: all 0.1s linear; cursor: pointer; }
+    .option-btn:active { transform: translate(4px, 4px); box-shadow: none !important; }
+    .option-btn.selected-a { background-color: #FF6B6B; color: white; border-color: #000; box-shadow: 4px 4px 0px 0px #000; }
+    .option-btn.selected-b { background-color: #C4B5FD; color: #000; border-color: #000; box-shadow: 4px 4px 0px 0px #000; }
+    .question-card { display: none; }
+    .question-card.active { display: block; }
+    .q-dot { width: 14px; height: 14px; }
+    .q-dot.answered { background-color: #FF6B6B; border-color: #000; }
+    .q-dot.current { background-color: #FFD93D; border-color: #000; transform: scale(1.3); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="text-center mb-6">
+        <div class="inline-block bg-neo-accent neo-border px-6 py-2 neo-shadow-sm mb-4">
+            <span class="font-black text-white text-sm uppercase tracking-widest">BÀI TEST TÍNH CÁCH</span>
+        </div>
+        <h1 class="font-black text-5xl sm:text-7xl uppercase tracking-tighter">MBTI</h1>
+        <p class="font-bold text-xl mt-4">Khám phá nhóm tính cách của bạn</p>
+    </div>
+
+    <div class="neo-border bg-white p-6 mb-6 neo-shadow">
+        <div class="flex items-center justify-between mb-3">
+            <span class="font-bold text-sm uppercase tracking-widest">Tiến độ</span>
+            <span class="font-black text-sm" id="q-counter">0 / 20</span>
+        </div>
+        <div class="neo-border bg-black h-5 relative overflow-hidden">
+            <div id="progress-bar" class="bg-neo-accent h-full" style="width: 0%"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4" id="dot-indicator">
+            {% for q in questions %}
+            <div class="q-dot neo-border bg-white {{ 'current' if loop.first }}" data-idx="{{ loop.index0 }}" title="Câu {{ loop.index }}"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form id="mbti-form" action="/mbti/result" method="POST">
+        {% for q in questions %}
+        <div class="question-card neo-border bg-white p-8 neo-shadow mb-6 {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+            <div class="flex items-start gap-4 mb-6">
+                <div class="neo-border bg-neo-secondary w-12 h-12 flex items-center justify-center flex-shrink-0 neo-shadow-sm">
+                    <span class="font-black text-xl">{{ loop.index }}</span>
+                </div>
+                <h3 class="font-black text-2xl sm:text-3xl uppercase tracking-tight leading-tight mt-1">{{ q.question }}</h3>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4 mt-8">
+                <label class="option-btn neo-border bg-white p-5 neo-shadow-sm text-center font-bold text-base sm:text-lg uppercase tracking-wide hover:bg-neo-secondary/50 block cursor-pointer" data-value="a" data-q="{{ q.id }}">
+                    <input type="radio" name="{{ q.id }}" value="a" class="hidden">
+                    <span class="block">A. {{ q.option_a }}</span>
+                </label>
+                <label class="option-btn neo-border bg-white p-5 neo-shadow-sm text-center font-bold text-base sm:text-lg uppercase tracking-wide hover:bg-neo-muted/50 block cursor-pointer" data-value="b" data-q="{{ q.id }}">
+                    <input type="radio" name="{{ q.id }}" value="b" class="hidden">
+                    <span class="block">B. {{ q.option_b }}</span>
+                </label>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="flex justify-between mt-8">
+            <button type="button" id="prev-btn" class="neo-btn font-bold text-sm uppercase tracking-widest neo-border px-8 py-4 bg-white neo-shadow-sm hidden">Trước</button>
+            <button type="button" id="next-btn" class="neo-btn font-bold text-sm uppercase tracking-widest neo-border px-8 py-4 bg-neo-secondary neo-shadow-sm">Sau</button>
+            <button type="submit" id="submit-btn" class="neo-btn font-black text-sm uppercase tracking-widest neo-border px-10 py-4 bg-neo-accent text-white neo-shadow-sm hidden">Xem kết quả</button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    try {
+        var cards = document.querySelectorAll('.question-card');
+        var total = cards.length;
+        var current = 0;
+        var answeredCount = 0;
+        var answered = new Array(total).fill(false);
+        var progressBar = document.getElementById('progress-bar');
+        var qCounter = document.getElementById('q-counter');
+        var prevBtn = document.getElementById('prev-btn');
+        var nextBtn = document.getElementById('next-btn');
+        var submitBtn = document.getElementById('submit-btn');
+        var form = document.getElementById('mbti-form');
+        var dots = document.querySelectorAll('.q-dot');
+        var transitioning = false;
+
+        if (!cards || total === 0) return;
+
+        function updateUI() {
+            var pct = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            qCounter.textContent = answeredCount + ' / ' + total;
+
+            dots.forEach(function(d, i) {
+                d.classList.remove('current');
+                if (i === current) d.classList.add('current');
+            });
+
+            prevBtn.classList.toggle('hidden', current === 0);
+            nextBtn.classList.toggle('hidden', current >= total - 1);
+            submitBtn.classList.toggle('hidden', current !== total - 1);
+        }
+
+        function goToCard(idx) {
+            if (idx < 0 || idx >= total) return;
+            transitioning = true;
+            cards.forEach(function(c, i) { c.classList.toggle('active', i === idx); });
+            current = idx;
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function() { transitioning = false; }, 300);
+        }
+
+        function markAnswered(idx) {
+            if (idx < 0 || idx >= total) return;
+            if (!answered[idx]) {
+                answered[idx] = true;
+                answeredCount++;
+                dots[idx].classList.add('answered');
+                updateUI();
+            }
+        }
+
+        cards.forEach(function(card) {
+            var labels = card.querySelectorAll('.option-btn');
+            labels.forEach(function(label) {
+                label.addEventListener('click', function() {
+                    try {
+                        var grid = this.closest('.grid');
+                        var siblings = grid.querySelectorAll('.option-btn');
+                        siblings.forEach(function(s) { s.classList.remove('selected-a', 'selected-b'); });
+                        this.classList.add(this.dataset.value === 'a' ? 'selected-a' : 'selected-b');
+                        var radio = this.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = true;
+                        var idx = parseInt(card.dataset.index);
+                        if (!isNaN(idx)) markAnswered(idx);
+                    } catch(e) {}
+                });
+            });
+        });
+
+        prevBtn.addEventListener('click', function() {
+            try {
+                if (transitioning) return;
+                if (current > 0) goToCard(current - 1);
+            } catch(e) {}
+        });
+
+        nextBtn.addEventListener('click', function() {
+            try {
+                if (transitioning) return;
+                if (current < total - 1) {
+                    if (!answered[current]) {
+                        alert('Vui lòng chọn A hoặc B trước khi sang câu tiếp theo.');
+                        return;
+                    }
+                    goToCard(current + 1);
+                }
+            } catch(e) {}
+        });
+
+        form.addEventListener('submit', function(e) {
+            try {
+                if (answeredCount < total) {
+                    e.preventDefault();
+                    var first = -1;
+                    for (var i = 0; i < total; i++) {
+                        if (!answered[i]) { first = i; break; }
+                    }
+                    alert('Bạn mới trả lời ' + answeredCount + '/' + total + ' câu. Vui lòng trả lời hết tất cả câu hỏi.');
+                    if (first >= 0) goToCard(first);
+                }
+            } catch(e) {}
+        });
+    } catch(e) {}
+})();
+</script>
+{% endblock %}

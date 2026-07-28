@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}CareerBot - Trang chủ{% endblock %}
+{% block content %}
+<div class="min-h-[80vh] flex flex-col items-center justify-center text-center">
+    <div class="inline-block bg-neo-accent neo-border px-6 py-2 neo-shadow-sm neo-rotate-1 mb-8">
+        <span class="font-black text-white text-sm uppercase tracking-widest">AI Agent Định hướng sự nghiệp</span>
+    </div>
+
+    <h1 class="font-black text-6xl sm:text-8xl lg:text-9xl uppercase tracking-tighter leading-none">
+        <span class="block">TÌM</span>
+        <span class="block text-neo-accent">NGHỀ</span>
+        <span class="block">CỦA BẠN</span>
+    </h1>
+
+    <p class="font-bold text-xl sm:text-2xl mt-8 max-w-xl leading-snug">
+        Khám phá bản thân qua MBTI, đánh giá kỹ năng và nhận
+        lộ trình sự nghiệp cá nhân hóa từ AI Agent.
+    </p>
+
+    <a href="/mbti" class="neo-btn inline-block bg-neo-accent text-white font-black text-2xl uppercase tracking-wide px-14 py-7 neo-border neo-shadow-xl mt-12 hover:bg-red-500">
+        BẮT ĐẦU LÀM BÀI TEST
+    </a>
+
+    <div class="flex flex-wrap justify-center gap-8 mt-16 text-sm font-bold uppercase tracking-widest">
+        <div class="neo-border bg-white px-6 py-4 neo-shadow-sm">20 câu MBTI</div>
+        <div class="neo-border bg-neo-secondary px-6 py-4 neo-shadow-sm">Phân tích cá nhân</div>
+        <div class="neo-border bg-neo-muted px-6 py-4 neo-shadow-sm">Đề xuất nghề nghiệp</div>
+    </div>
+</div>
+{% endblock %}

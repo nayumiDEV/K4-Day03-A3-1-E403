@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}Kết quả MBTI - CareerBot{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto text-center mb-12">
+    <div class="inline-block bg-neo-accent neo-border px-6 py-2 neo-shadow-sm mb-4">
+        <span class="font-black text-white text-sm uppercase tracking-widest">KẾT QUẢ MBTI</span>
+    </div>
+    <div class="neo-border bg-black text-white inline-block px-10 py-6 neo-shadow-lg mt-4 neo-rotate-1">
+        <p class="font-medium text-lg uppercase tracking-widest">Nhóm tính cách của bạn</p>
+        <h1 class="font-black text-7xl sm:text-9xl uppercase tracking-tighter mt-2">{{ mbti_type }}</h1>
+    </div>
+    <h2 class="font-black text-3xl sm:text-5xl uppercase tracking-tight mt-8">{{ mbti_info.title }}</h2>
+    <p class="font-bold text-xl mt-4 max-w-2xl mx-auto">{{ mbti_info.description }}</p>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <div class="neo-border bg-white p-8 neo-shadow mb-10">
+        <h3 class="font-black text-2xl uppercase tracking-tight mb-6">Chi tiết 4 khía cạnh</h3>
+        <div class="grid sm:grid-cols-2 gap-6">
+            {% for key, info in details.items() %}
+            <div>
+                <div class="flex justify-between mb-1">
+                    <span class="font-bold text-sm uppercase tracking-widest">{{ info.label }}</span>
+                    <span class="font-black text-sm">{{ info.score }}/{{ info.max }}</span>
+                </div>
+                <div class="neo-border bg-gray-100 h-5 overflow-hidden">
+                    <div class="bg-black h-full" style="width: {{ (info.score / info.max * 100)|int if info.max > 0 else 0 }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if mbti_info.recommended_careers %}
+    <div class="neo-border bg-neo-secondary p-8 neo-shadow-lg mb-10">
+        <div class="neo-border bg-white p-6 neo-shadow-sm">
+            <h3 class="font-black text-2xl uppercase tracking-tight mb-6">Nghề nghiệp phù hợp với {{ mbti_type }}</h3>
+            <div class="grid sm:grid-cols-2 gap-4">
+                {% for career in mbti_info.recommended_careers %}
+                <div class="neo-border bg-white p-4 neo-shadow-sm font-bold text-base uppercase tracking-wide flex items-center gap-3">
+                    <span class="text-neo-accent text-xl">&gt;</span>
+                    {{ career }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div id="agent-section" class="neo-border bg-black text-white p-8 neo-shadow-lg mb-10 grid-bg">
+        <h3 class="font-black text-3xl uppercase tracking-tight" id="agent-title">Phân tích sâu hơn</h3>
+        <p class="font-bold text-lg mt-2 opacity-90" id="agent-subtitle">Tôi sẽ hỏi bạn một số câu để đề xuất nghề nghiệp chính xác nhất.</p>
+
+        <div id="agent-chat" class="mt-8 space-y-6"></div>
+
+        <div id="qa-active" class="neo-border bg-white text-black p-8 neo-shadow-sm mt-6">
+            <p class="font-bold text-xs uppercase tracking-widest opacity-50 mb-2">Đang tải câu hỏi...</p>
+            <div class="flex gap-2">
+                <div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both;"></div>
+                <div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s;"></div>
+                <div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s;"></div>
+            </div>
+        </div>
+
+        <div id="qa-input-area" class="neo-border bg-white p-6 neo-shadow-sm mt-4 hidden">
+            <p id="agent-question" class="font-bold text-base leading-relaxed"></p>
+            <div class="flex gap-4 mt-4">
+                <input type="text" id="qa-answer" placeholder="Nhập câu trả lời..."
+                    class="neo-input flex-1 neo-border bg-white px-6 py-4 font-bold text-base placeholder:text-black/40">
+                <button id="qa-send" class="neo-btn neo-border bg-neo-accent text-white px-8 font-black text-sm uppercase tracking-widest neo-shadow-sm">Gửi</button>
+            </div>
+            <p id="qa-progress" class="font-bold text-xs uppercase tracking-widest mt-3 opacity-50"></p>
+        </div>
+    </div>
+
+    <div id="result-section" class="hidden"></div>
+
+    <div class="text-center mt-6">
+        <a href="/mbti" class="neo-btn font-bold text-sm uppercase tracking-widest neo-border px-8 py-4 bg-white neo-shadow-sm">Làm lại bài test</a>
+    </div>
+</div>
+
+<script>
+(function() {
+    try {
+        var mbtiType = '{{ mbti_type }}';
+        var sessionId = null;
+        var agentChat = document.getElementById('agent-chat');
+        var qaActive = document.getElementById('qa-active');
+        var qaInputArea = document.getElementById('qa-input-area');
+        var agentQuestion = document.getElementById('agent-question');
+        var qaAnswer = document.getElementById('qa-answer');
+        var qaSend = document.getElementById('qa-send');
+        var qaProgress = document.getElementById('qa-progress');
+        var resultSection = document.getElementById('result-section');
+        var agentTitle = document.getElementById('agent-title');
+        var agentSubtitle = document.getElementById('agent-subtitle');
+        var busy = false;
+
+        function fetchWithTimeout(url, opts, ms) {
+            ms = ms || 10000;
+            var controller = new AbortController();
+            var timer = setTimeout(function() { controller.abort(); }, ms);
+            opts.signal = controller.signal;
+            return fetch(url, opts).then(function(r) {
+                clearTimeout(timer);
+                return r.json();
+            }).catch(function(err) {
+                clearTimeout(timer);
+                throw err;
+            });
+        }
+
+        function addAgentMessage(text, isAgent) {
+            var div = document.createElement('div');
+            div.className = 'neo-border ' + (isAgent ? 'bg-white text-black' : 'bg-neo-accent/20 text-white border-white/50') + ' p-5 neo-shadow-sm';
+            if (isAgent) {
+                div.innerHTML = '<p class="font-bold text-xs uppercase tracking-widest text-neo-accent mb-2">Career Agent</p><p class="font-bold text-base leading-relaxed">' + escapeHtml(text) + '</p>';
+            } else {
+                div.innerHTML = '<p class="font-bold text-xs uppercase tracking-widest text-neo-secondary mb-2">Bạn</p><p class="font-bold text-base leading-relaxed">' + escapeHtml(text) + '</p>';
+            }
+            agentChat.appendChild(div);
+            agentChat.scrollTop = agentChat.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function showError(msg) {
+            qaActive.classList.remove('hidden');
+            qaInputArea.classList.add('hidden');
+            qaActive.innerHTML = '<p class="font-bold text-red-500">' + escapeHtml(msg) + '</p>';
+        }
+
+        function showQuestion(q) {
+            qaActive.classList.add('hidden');
+            qaInputArea.classList.remove('hidden');
+            agentQuestion.textContent = q.question || q;
+            qaAnswer.value = '';
+            qaAnswer.focus();
+            if (q.step !== undefined && q.total) {
+                qaProgress.textContent = 'Câu hỏi ' + (q.step + 1) + ' / ' + q.total;
+            } else {
+                qaProgress.textContent = '';
+            }
+        }
+
+        function sendAnswer() {
+            if (busy) return;
+            var answer = qaAnswer.value.trim();
+            if (!answer) { alert('Vui lòng nhập câu trả lời.'); return; }
+            busy = true;
+
+            addAgentMessage(answer, false);
+            qaInputArea.classList.add('hidden');
+            qaActive.classList.remove('hidden');
+            qaActive.innerHTML = '<p class="font-bold text-xs uppercase tracking-widest opacity-50 mb-2">Agent đang phân tích...</p><div class="flex gap-2"><div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both;"></div><div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s;"></div><div class="w-3 h-3 bg-black" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s;"></div></div>';
+
+            fetchWithTimeout('/api/agent/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId, answer: answer })
+            })
+            .then(function(data) {
+                if (data.error) { showError(data.error); busy = false; return; }
+                if (data.type === 'result') {
+                    showResults(data.result);
+                    busy = false;
+                    return;
+                }
+                if (data.next) {
+                    showQuestion(data.next);
+                    busy = false;
+                } else {
+                    busy = false;
+                }
+            })
+            .catch(function(err) {
+                showError('Lỗi kết nối hoặc quá thời gian chờ. Vui lòng thử lại.');
+                busy = false;
+            });
+        }
+
+        function showResults(result) {
+            qaInputArea.classList.add('hidden');
+            qaActive.classList.add('hidden');
+            agentTitle.textContent = 'Kết quả phân tích';
+            agentSubtitle.textContent = 'Dựa trên MBTI và thông tin bạn đã cung cấp.';
+
+            if (result.status === 'success' && result.data && result.data.profile_analysis) {
+                var analysis = result.data.profile_analysis;
+                var html = '';
+                if (analysis.recommendations && analysis.recommendations.length > 0) {
+                    html = '<h3 class="font-black text-2xl uppercase tracking-tight mb-6 text-white">Đề xuất nghề nghiệp cho bạn</h3><div class="space-y-6">';
+                    analysis.recommendations.forEach(function(rec, idx) {
+                        html += '<div class="neo-border bg-white text-black p-8 neo-shadow-lg">';
+                        html += '<div class="flex items-start gap-4">';
+                        var bgClass = idx === 0 ? 'bg-neo-accent text-white' : (idx === 1 ? 'bg-black text-white' : 'bg-neo-muted');
+                        html += '<div class="neo-border ' + bgClass + ' w-14 h-14 flex items-center justify-center neo-shadow-sm flex-shrink-0"><span class="font-black text-2xl">' + (idx + 1) + '</span></div>';
+                        html += '<div class="flex-1"><h4 class="font-black text-3xl uppercase tracking-tight">' + escapeHtml(rec.role) + '</h4>';
+                        html += '<div class="neo-border bg-black text-white px-4 py-1 inline-block mt-2"><span class="font-black text-lg">' + rec.overall_match + '%</span><span class="font-bold text-xs uppercase tracking-widest ml-1">phù hợp</span></div>';
+                        if (rec.description) html += '<p class="font-bold text-base mt-3">' + escapeHtml(rec.description) + '</p>';
+                        if (rec.evidence) {
+                            html += '<div class="grid sm:grid-cols-3 gap-4 mt-4">';
+                            if (rec.evidence.matched_interests && rec.evidence.matched_interests.length > 0) {
+                                html += '<div><p class="font-bold text-xs uppercase tracking-widest text-neo-accent mb-2">Sở thích khớp</p><div class="flex flex-wrap gap-2">';
+                                rec.evidence.matched_interests.forEach(function(item) { html += '<span class="neo-border bg-neo-accent/10 px-3 py-1 font-bold text-sm">' + escapeHtml(item) + '</span>'; });
+                                html += '</div></div>';
+                            }
+                            if (rec.evidence.matched_skills && rec.evidence.matched_skills.length > 0) {
+                                html += '<div><p class="font-bold text-xs uppercase tracking-widest text-black mb-2">Kỹ năng khớp</p><div class="flex flex-wrap gap-2">';
+                                rec.evidence.matched_skills.forEach(function(item) { html += '<span class="neo-border bg-black text-white px-3 py-1 font-bold text-sm">' + escapeHtml(item) + '</span>'; });
+                                html += '</div></div>';
+                            }
+                            if (rec.evidence.matched_goals && rec.evidence.matched_goals.length > 0) {
+                                html += '<div><p class="font-bold text-xs uppercase tracking-widest mb-2">Mục tiêu khớp</p><div class="flex flex-wrap gap-2">';
+                                rec.evidence.matched_goals.forEach(function(item) { html += '<span class="neo-border bg-neo-muted/30 px-3 py-1 font-bold text-sm">' + escapeHtml(item) + '</span>'; });
+                                html += '</div></div>';
+                            }
+                            html += '</div>';
+                        }
+                        if (rec.priority_skill_gaps && rec.priority_skill_gaps.length > 0) {
+                            html += '<div class="mt-4"><p class="font-bold text-xs uppercase tracking-widest text-red-600 mb-2">Kỹ năng cần phát triển</p><div class="flex flex-wrap gap-2">';
+                            rec.priority_skill_gaps.forEach(function(gap) { html += '<span class="neo-border bg-red-50 border-red-300 px-3 py-1 font-bold text-sm">' + escapeHtml(gap.skill) + ' (thiếu bậc ' + gap.gap + ')</span>'; });
+                            html += '</div></div>';
+                        }
+                        html += '</div></div></div>';
+                    });
+                    html += '</div>';
+                }
+                resultSection.innerHTML = html;
+            } else {
+                resultSection.innerHTML = '<div class="neo-border bg-neo-accent/10 p-10 neo-shadow-lg text-center"><p class="font-black text-2xl uppercase tracking-tight">Không thể phân tích. Vui lòng thử lại.</p></div>';
+            }
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        fetchWithTimeout('/api/agent/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mbti_type: mbtiType })
+        })
+        .then(function(data) {
+            if (data.error) { showError(data.error); return; }
+            sessionId = data.session_id;
+            if (data.messages) {
+                data.messages.forEach(function(msg) {
+                    addAgentMessage(msg, true);
+                });
+            }
+            if (data.next) {
+                showQuestion(data.next);
+            }
+        })
+        .catch(function(err) {
+            showError('Lỗi kết nối máy chủ. Vui lòng tải lại trang.');
+        });
+
+        qaSend.addEventListener('click', sendAnswer);
+        qaAnswer.addEventListener('keydown', function(e) { if (e.key === 'Enter') sendAnswer(); });
+    } catch(e) {}
+})();
+</script>
+
+<style>
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+</style>
+{% endblock %}

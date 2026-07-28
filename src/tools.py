@@ -2297,6 +2297,149 @@ def score_career_interest_assessment(answers: Any) -> str:
     )
 
 
+MBTI_RIASEC_MAP = {
+    "INTJ": ["I", "R"],
+    "INTP": ["I", "R"],
+    "ENTJ": ["E", "I"],
+    "ENTP": ["E", "A"],
+    "INFJ": ["S", "A"],
+    "INFP": ["A", "S"],
+    "ENFJ": ["S", "E"],
+    "ENFP": ["E", "A"],
+    "ISTJ": ["C", "I"],
+    "ISFJ": ["S", "C"],
+    "ESTJ": ["E", "C"],
+    "ESFJ": ["S", "E"],
+    "ISTP": ["R", "I"],
+    "ISFP": ["A", "R"],
+    "ESTP": ["E", "R"],
+    "ESFP": ["S", "A"],
+}
+
+MBTI_DESCRIPTIONS = {
+    "INTJ": {"title": "Nha chien luoc", "desc": "Tu duy doc lap, co tam nhin xa, thich lap ke hoach chien luoc"},
+    "INTP": {"title": "Nha tu duy", "desc": "Ham hieu biet, thich phan tich logic va giai quyet van de phuc tap"},
+    "ENTJ": {"title": "Nha lanh dao", "desc": "Quyet doan, co tam nhin va kha nang to chuc xuat sac"},
+    "ENTP": {"title": "Nha phat minh", "desc": "Sang tao, thich thach thuc va luon tim kiem giai phap moi"},
+    "INFJ": {"title": "Nguoi truyen cam hung", "desc": "Co tam nhin sau sac ve con nguoi, muon tao tac dong tich cuc"},
+    "INFP": {"title": "Nguoi ly tuong", "desc": "Giau cam xuc, sang tao va luon tim kiem y nghia trong cong viec"},
+    "ENFJ": {"title": "Nguoi truyen cam hung", "desc": "Am ap, co suc thuyet phuc va quan tam den su phat trien cua nguoi khac"},
+    "ENFP": {"title": "Nguoi truyen lua", "desc": "Nhiet tinh, sang tao va yeu thich ket noi voi moi nguoi"},
+    "ISTJ": {"title": "Nguoi trach nhiem", "desc": "Co trach nhiem, ti mi va tuan thu quy trinh chat che"},
+    "ISFJ": {"title": "Nguoi bao ve", "desc": "Tan tam, chu dao va luon ho tro nguoi khac"},
+    "ESTJ": {"title": "Nguoi dieu hanh", "desc": "Thuc te, quyet doan va co kha nang to chuc xuat sac"},
+    "ESFJ": {"title": "Nguoi ket noi", "desc": "Hoa dong, chu dao va thich giup do nguoi khac"},
+    "ISTP": {"title": "Nguoi thuc hanh", "desc": "Thuc te, kheo tay va thich tim hieu cach van hanh cua su vat"},
+    "ISFP": {"title": "Nguoi nghe si", "desc": "Nhay cam, tinh te va co gu tham my cao"},
+    "ESTP": {"title": "Nguoi hanh dong", "desc": "Nang dong, thuc te va thich giai quyet van de nhanh"},
+    "ESFP": {"title": "Nguoi trinh dien", "desc": "Nhiet tinh, vui ve va thich lam viec voi moi nguoi"},
+}
+
+MBTI_CAREER_RECOMMENDATIONS = {
+    "INTJ": ["Ky su AI / ML", "Chuyen gia du lieu", "Kien truc su he thong", "Chuyen vien phan tich chien luoc", "Giam doc cong nghe (CTO)"],
+    "INTP": ["Nha phat trien phan mem", "Nha nghien cuu khoa hoc", "Ky su Machine Learning", "Chuyen vien an ninh mang", "Ky su tri tue nhan tao"],
+    "ENTJ": ["Quan ly san pham (PM)", "Giam doc dieu hanh (CEO)", "Truong nhom ky thuat", "Giam doc du an", "Chuyen vien tu van chien luoc"],
+    "ENTP": ["Chuyen gia doi moi sang tao", "Tu van chien luoc", "Khoi nghiep cong nghe", "Chuyen vien phat trien kinh doanh", "Product Owner"],
+    "INFJ": ["Chuyen vien nghien cuu UX", "Chien luoc gia noi dung", "Chuyen vien phat trien to chuc", "Chuyen vien tu van huong nghiep", "Thiet ke trai nghiem nguoi dung"],
+    "INFP": ["Thiet ke do hoa", "Bien tap vien / Nha van", "Chuyen vien truyen thong", "Chuyen vien noi dung sang tao", "Thiet ke UI/UX"],
+    "ENFJ": ["Quan ly nhan su", "Chuyen vien dao tao", "Tu van huong nghiep", "Chuyen vien quan he cong chung", "Giao vien / Giang vien"],
+    "ENFP": ["Chuyen vien Marketing", "Giam doc sang tao", "Quan he cong chung (PR)", "Chuyen vien to chuc su kien", "Chuyen vien noi dung so"],
+    "ISTJ": ["Chuyen vien phan tich du lieu", "Quan tri co so du lieu", "Kiem soat chat luong (QA)", "Chuyen vien tai chinh", "Quan ly van hanh"],
+    "ISFJ": ["Dieu phoi du an", "Chuyen vien QA", "Chuyen vien ho tro ky thuat", "Quan ly hanh chinh", "Chuyen vien cham soc khach hang"],
+    "ESTJ": ["Quan ly van hanh", "Chuyen vien phan tich kinh doanh", "Giam doc du an", "Quan ly san xuat", "Chuyen vien tu van quan ly"],
+    "ESFJ": ["Chuyen vien quan he khach hang", "Quan ly tai khoan", "Chuyen vien nhan su", "Chuyen vien cham soc khach hang", "Dieu phoi vien su kien"],
+    "ISTP": ["Ky su Backend", "Chuyen vien DevOps", "Ky thuat vien he thong", "Ky su phan cung", "Chuyen vien bao mat"],
+    "ISFP": ["Thiet ke UI", "Hoa si minh hoa", "Nhiep anh gia", "Thiet ke san pham", "Chuyen vien trang tri noi that"],
+    "ESTP": ["Ky su ban hang ky thuat", "Product Owner", "Phat trien kinh doanh", "Chuyen vien tu van giai phap", "Quan ly du an linh hoat"],
+    "ESFP": ["To chuc su kien", "Chuyen vien PR", "Huong dan vien du lich", "Chuyen vien Marketing su kien", "Chuyen vien truyen thong"],
+}
+
+
+def get_mbti_profile(mbti_type: str) -> str:
+    """
+    Tra cuu thong tin nhom tinh cach MBTI va nghe nghiep phu hop.
+
+    Args:
+        mbti_type: Ma MBTI gom 4 ky tu (VD: INTJ, ENFP, ISTJ).
+    Returns:
+        JSON string chua thong tin mo ta nhom tinh cach, ma RIASEC tuong ung
+        va danh sach nghe nghiep de xuat.
+    Error semantics:
+        Tra ve loi neu ma MBTI khong hop le.
+    """
+    mbti_key = mbti_type.strip().upper()
+    if mbti_key not in MBTI_DESCRIPTIONS:
+        return _error(
+            "INVALID_MBTI",
+            f"Khong tim thay nhom MBTI '{mbti_type}'. Vui long nhap ma 4 ky tu hop le (VD: INTJ, ENFP).",
+        )
+
+    return _response(
+        {
+            "mbti_type": mbti_key,
+            "title": MBTI_DESCRIPTIONS[mbti_key]["title"],
+            "description": MBTI_DESCRIPTIONS[mbti_key]["desc"],
+            "riasec_profile": MBTI_RIASEC_MAP[mbti_key],
+            "recommended_careers": MBTI_CAREER_RECOMMENDATIONS[mbti_key],
+            "career_count": len(MBTI_CAREER_RECOMMENDATIONS[mbti_key]),
+        },
+        confidence=0.85,
+    )
+
+
+def analyze_career_profile(
+    mbti_type: str,
+    interests: list[str] | str,
+    current_skills: Any,
+    goals: str,
+    work_preferences: list[str] | str | None = None,
+) -> str:
+    """
+    Phan tich toan dien ho so nguoi dung: MBTI + so thich + ky nang + muc tieu.
+
+    Args:
+        mbti_type: Ma MBTI (VD: INTJ).
+        interests: So thich, each bang dau phay.
+        current_skills: Ky nang hien tai.
+        goals: Muc tieu nghe nghiep.
+        work_preferences: So thich moi truong lam viec.
+    Returns:
+        JSON string gom ket qua MBTI va de xuat nghe nghiep ket hop.
+    """
+    mbti_key = mbti_type.strip().upper()
+    if mbti_key not in MBTI_DESCRIPTIONS:
+        return _error("INVALID_MBTI", f"Khong tim thay nhom MBTI '{mbti_type}'.")
+
+    riasec_profile = "".join(MBTI_RIASEC_MAP[mbti_key])
+    career_result = recommend_career_paths(
+        interests=interests,
+        current_skills=current_skills,
+        goals=goals,
+        riasec_profile=riasec_profile,
+        work_preferences=work_preferences,
+    )
+
+    try:
+        career_data = json.loads(career_result)
+    except (json.JSONDecodeError, TypeError):
+        return _error("PARSE_ERROR", "Khong the phan tich ket qua tu recommend_career_paths.")
+
+    if career_data.get("status") == "error":
+        return career_result
+
+    return _response(
+        {
+            "mbti_type": mbti_key,
+            "mbti_title": MBTI_DESCRIPTIONS[mbti_key]["title"],
+            "mbti_description": MBTI_DESCRIPTIONS[mbti_key]["desc"],
+            "mbti_riasec": "".join(MBTI_RIASEC_MAP[mbti_key]),
+            "mbti_career_suggestions": MBTI_CAREER_RECOMMENDATIONS[mbti_key],
+            "profile_analysis": career_data.get("data", career_data),
+        },
+        confidence=0.85,
+    )
+
+
 # Public allowlist used by the Agent executor to validate and dispatch Actions.
 AVAILABLE_TOOLS = {
     "search_careers": search_careers,
@@ -2308,4 +2451,6 @@ AVAILABLE_TOOLS = {
     "start_career_interest_assessment": start_career_interest_assessment,
     "submit_career_interest_answers": submit_career_interest_answers,
     "score_career_interest_assessment": score_career_interest_assessment,
+    "get_mbti_profile": get_mbti_profile,
+    "analyze_career_profile": analyze_career_profile,
 }

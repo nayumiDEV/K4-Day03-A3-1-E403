@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareerBot - Định hướng sự nghiệp{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+                    colors: {
+                        'neo-bg': '#FFFDF5',
+                        'neo-accent': '#FF6B6B',
+                        'neo-secondary': '#FFD93D',
+                        'neo-muted': '#C4B5FD',
+                        'neo-black': '#000000',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: #FFFDF5; }
+        .neo-border { border: 4px solid #000; }
+        .neo-shadow-sm { box-shadow: 4px 4px 0px 0px #000; }
+        .neo-shadow { box-shadow: 8px 8px 0px 0px #000; }
+        .neo-shadow-lg { box-shadow: 12px 12px 0px 0px #000; }
+        .neo-shadow-xl { box-shadow: 16px 16px 0px 0px #000; }
+        .neo-btn { transition: all 0.1s linear; cursor: pointer; }
+        .neo-btn:active { transform: translate(4px, 4px); box-shadow: none !important; }
+        .neo-card { transition: all 0.2s ease-out; }
+        .neo-card:hover { transform: translateY(-4px); box-shadow: 12px 12px 0px 0px #000; }
+        .neo-rotate-1 { transform: rotate(-1deg); }
+        .neo-rotate-2 { transform: rotate(2deg); }
+        .neo-rotate-3 { transform: rotate(3deg); }
+        .neo-input:focus { background-color: #FFD93D; box-shadow: 4px 4px 0px 0px #000; outline: none; }
+        .halftone-bg { background-image: radial-gradient(#000 1.5px, transparent 1.5px); background-size: 20px 20px; }
+        .grid-bg { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px); }
+        @media (prefers-reduced-motion: reduce) { .neo-btn, .neo-card { transition: none; } }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="font-sans">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t-4 border-black bg-black text-white mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-10 text-center">
+            <p class="font-bold text-lg uppercase tracking-widest">CareerBot - Định hướng sự nghiệp thông minh</p>
+            <p class="font-medium text-base mt-2 opacity-80">VinUni - Bài Lab 3: Chatbot vs ReAct Agent</p>
+        </div>
+    </footer>
+</body>
+</html>
