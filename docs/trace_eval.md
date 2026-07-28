@@ -6,11 +6,11 @@
 
 | Tiêu chí | Điểm (1–5) | Lý do đánh giá |
 | :--- | :---: | :--- |
-| 🧠 **Multi-step Reasoning** | **3/5** | Chatbot cần phân tích thông tin cơ bản của người dùng (ngành học, kỹ năng, sở thích) trước khi đưa ra gợi ý nghề nghiệp, nhưng quy trình suy luận không quá phức tạp. |
-| 🛠️ **Tool Interaction** | **4/5** | Cần sử dụng công cụ hoặc cơ sở dữ liệu để tra cứu thông tin nghề nghiệp, kỹ năng và lộ trình học nhằm tăng độ chính xác của câu trả lời. |
-| 🔀 **Dynamic Decision** | **3/5** | Chatbot có điều chỉnh câu trả lời dựa trên hồ sơ người dùng, nhưng số lượng nhánh quyết định còn hạn chế và không cần vòng lặp lập kế hoạch như ReAct Agent. |
-| ⏳ **Long Horizon** | **2/5** | Hầu hết các yêu cầu được xử lý trong một lượt hội thoại hoặc một vài bước đơn giản, không cần thực hiện chuỗi hành động dài. |
-| **TỔNG ĐIỂM FIT** | **12/20** | **KẾT LUẬN: Bài toán phù hợp với Augmented Chatbot. Việc bổ sung công cụ tra cứu giúp tăng chất lượng tư vấn, nhưng chưa cần kiến trúc ReAct Agent đầy đủ do quy trình suy luận, lập kế hoạch còn đơn giản.** |
+| 🧠 **Multi-step Reasoning** | **5/5** | Chatbot cần phân tích nhiều thông tin của người dùng (ngành học, kỹ năng, sở thích, mục tiêu nghề nghiệp), sau đó tổng hợp để đưa ra lời khuyên phù hợp thay vì trả lời trực tiếp. |
+| 🛠️ **Tool Interaction** | **5/5** | Cần sử dụng các công cụ để tra cứu dữ liệu nghề nghiệp, yêu cầu kỹ năng, lộ trình học hoặc cơ sở dữ liệu việc làm nhằm đưa ra tư vấn chính xác. |
+| 🔀 **Dynamic Decision** | **5/5** | Hành động tiếp theo phụ thuộc vào kết quả bước trước. Ví dụ, nếu người dùng thiếu kỹ năng cần thiết, Agent sẽ ưu tiên đề xuất lộ trình học thay vì gợi ý ứng tuyển ngay. |
+| ⏳ **Long Horizon** | **4/5** | Quy trình tư vấn gồm nhiều bước: phân tích hồ sơ → xác định nghề phù hợp → đánh giá khoảng cách kỹ năng → đề xuất lộ trình phát triển → đưa ra khuyến nghị cuối cùng. |
+| **TỔNG ĐIỂM FIT** | **19/20** | **KẾT LUẬN: Bài toán rất phù hợp để triển khai bằng ReAct Agent thay vì Chatbot truyền thống, vì cần suy luận nhiều bước và sử dụng công cụ để hỗ trợ ra quyết định.** |
 
 
 ## 🔍 2. SO SÁNH PHẢN HỒI (TEST CASE #3)
