@@ -1,0 +1,27 @@
+flowchart TD
+    A([User Question]) --> B{Question Complexity?}
+
+    %% Chatbot Path
+    B -->|Simple Question| C[Chatbot Path]
+    C --> D[LLM answers directly]
+    D --> Z([Final Response])
+
+    %% ReAct Agent Path
+    B -->|Complex / Personalized Career Question| E[ReAct Agent Path]
+    E --> F[Thought: Analyze user intent and identify missing information]
+    F --> G[Action: Call Career Tool / Knowledge Base]
+    G --> H[Observation: Receive career information]
+    H --> I{Need another tool?}
+
+    I -->|Yes| J[Action: Call additional tool]
+    J --> K[Observation: Receive new information]
+    K --> I
+
+    I -->|No| L[Thought: Synthesize all observations]
+    L --> M[Generate personalized recommendation]
+    M --> Z([Final Response])
+
+    %% Error Handling
+    G -. Tool Error .-> N[Fallback / Guardrail Response]
+    J -. Tool Error .-> N
+    N --> Z
