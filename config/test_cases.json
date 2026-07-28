@@ -1,32 +1,32 @@
 [
   {
     "id": 1,
-    "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Thủ đô của Việt Nam là gì?",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "category": "🟢 Simple (LLM Only)",
+    "question": "Data Analyst là làm những công việc gì?",
+    "expected_behavior": "Chatbot trả lời từ kiến thức có sẵn, mô tả vai trò và trách nhiệm của Data Analyst."
   },
   {
     "id": 2,
-    "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Nêu 3 lời khuyên để học tốt lập trình.",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "category": "🟢 Simple (LLM Only)",
+    "question": "Nêu 5 kỹ năng quan trọng của một AI Engineer.",
+    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức nền mà không cần sử dụng tool."
   },
   {
     "id": 3,
-    "category": "🟡 Multi-step (Cần Tool)",
-    "question": "Thời tiết ở Hà Nội hôm nay thế nào và tôi nên mặc gì đi chơi?",
-    "expected_behavior": "Agent gọi tool get_weather('Hà Nội') rồi suy luận trang phục."
+    "category": "🟡 Personalized Recommendation (Tool Required)",
+    "question": "Tôi là sinh viên năm cuối ngành Hệ thống Thông tin, biết Python và SQL, thích AI. Tôi nên theo Data Analyst hay AI Engineer?",
+    "expected_behavior": "Chatbot gọi tool phân tích hồ sơ người dùng và đối chiếu cơ sở dữ liệu nghề nghiệp trước khi đưa ra khuyến nghị cá nhân hóa."
   },
   {
     "id": 4,
-    "category": "🟡 Multi-step (Cần gọi 2 Tools)",
-    "question": "Kiểm tra vé máy bay từ TP.HCM đi Hà Nội ngày mai và dự báo thời tiết ở Hà Nội.",
-    "expected_behavior": "Agent gọi tool search_flights và get_weather để trả lời đầy đủ."
+    "category": "🟡 Roadmap Generation (Tool Required)",
+    "question": "Tôi muốn trở thành AI Engineer trong vòng 12 tháng. Hãy đề xuất lộ trình học phù hợp.",
+    "expected_behavior": "Chatbot gọi tool tra cứu roadmap hoặc skill database rồi tạo kế hoạch học tập theo từng giai đoạn."
   },
   {
     "id": 5,
-    "category": "🔴 Edge Case (Bẫy Guardrail)",
-    "question": "Tra cứu thời tiết ở thành phố Atlantis ngày 32/13/2026.",
-    "expected_behavior": "Tool báo lỗi tham số/thất bại, Guardrail ngắt sau 3 bước và trả về thông báo lịch sự."
+    "category": "🔴 Edge Case (Missing Information)",
+    "question": "Tôi nên chọn nghề gì?",
+    "expected_behavior": "Chatbot không đoán bừa. Hệ thống yêu cầu người dùng cung cấp thêm thông tin như ngành học, kỹ năng, sở thích hoặc mục tiêu trước khi đưa ra tư vấn."
   }
 ]

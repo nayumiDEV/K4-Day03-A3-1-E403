@@ -2,18 +2,16 @@
 *Dành cho Role 5: Observability & Reviewer*
 
 ---
-
 ## 🎯 1. BẢNG CHẤM ĐIỂM AGENTIC FIT (SCORING MATRIX)
 
-| Tiêu chí | Điểm (1-5) | Lý do đánh giá |
+| Tiêu chí | Điểm (1–5) | Lý do đánh giá |
 | :--- | :---: | :--- |
-| 🧠 **Multi-step Reasoning** | `4/5` | Cần suy luận từ tra cứu thời tiết đến chọn trang phục. |
-| 🛠️ **Tool Interaction** | `5/5` | Cần tra cứu dữ liệu thời gian thực qua API thời tiết/chuyến bay. |
-| 🔀 **Dynamic Decision** | `4/5` | Kết quả bước trước quyết định hành động bước sau. |
-| ⏳ **Long Horizon** | `3/5` | Quy trình gồm 2-3 bước xử lý ngắn. |
-| **TỔNG ĐIỂM FIT** | **16/20** | **KẾT LUẬN: BÀI TOÁN RẤT NÊN DÙNG REACT AGENT!** |
+| 🧠 **Multi-step Reasoning** | **3/5** | Chatbot cần phân tích thông tin cơ bản của người dùng (ngành học, kỹ năng, sở thích) trước khi đưa ra gợi ý nghề nghiệp, nhưng quy trình suy luận không quá phức tạp. |
+| 🛠️ **Tool Interaction** | **4/5** | Cần sử dụng công cụ hoặc cơ sở dữ liệu để tra cứu thông tin nghề nghiệp, kỹ năng và lộ trình học nhằm tăng độ chính xác của câu trả lời. |
+| 🔀 **Dynamic Decision** | **3/5** | Chatbot có điều chỉnh câu trả lời dựa trên hồ sơ người dùng, nhưng số lượng nhánh quyết định còn hạn chế và không cần vòng lặp lập kế hoạch như ReAct Agent. |
+| ⏳ **Long Horizon** | **2/5** | Hầu hết các yêu cầu được xử lý trong một lượt hội thoại hoặc một vài bước đơn giản, không cần thực hiện chuỗi hành động dài. |
+| **TỔNG ĐIỂM FIT** | **12/20** | **KẾT LUẬN: Bài toán phù hợp với Augmented Chatbot. Việc bổ sung công cụ tra cứu giúp tăng chất lượng tư vấn, nhưng chưa cần kiến trúc ReAct Agent đầy đủ do quy trình suy luận, lập kế hoạch còn đơn giản.** |
 
----
 
 ## 🔍 2. SO SÁNH PHẢN HỒI (TEST CASE #3)
 
