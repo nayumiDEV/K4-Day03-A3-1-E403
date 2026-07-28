@@ -10,7 +10,7 @@
 | 🛠️ **Tool Interaction** | **4/5** | Cần sử dụng công cụ hoặc cơ sở dữ liệu để tra cứu thông tin nghề nghiệp, kỹ năng và lộ trình học nhằm tăng độ chính xác của câu trả lời. |
 | 🔀 **Dynamic Decision** | **3/5** | Chatbot có điều chỉnh câu trả lời dựa trên hồ sơ người dùng, nhưng số lượng nhánh quyết định còn hạn chế và không cần vòng lặp lập kế hoạch như ReAct Agent. |
 | ⏳ **Long Horizon** | **2/5** | Hầu hết các yêu cầu được xử lý trong một lượt hội thoại hoặc một vài bước đơn giản, không cần thực hiện chuỗi hành động dài. |
-| **TỔNG ĐIỂM FIT** | **12/20** | **KẾT LUẬN: Bài toán phù hợp với Augmented Chatbot. Việc bổ sung công cụ tra cứu giúp tăng chất lượng tư vấn, nhưng chưa cần kiến trúc ReAct Agent đầy đủ do quy trình suy luận và lập kế hoạch còn đơn giản.** |
+| **TỔNG ĐIỂM FIT** | **12/20** | **KẾT LUẬN: Bài toán phù hợp với Augmented Chatbot. Việc bổ sung công cụ tra cứu giúp tăng chất lượng tư vấn, nhưng chưa cần kiến trúc ReAct Agent đầy đủ do quy trình suy luận, lập kế hoạch còn đơn giản.** |
 
 
 ## 🔍 2. SO SÁNH PHẢN HỒI (TEST CASE #3)
