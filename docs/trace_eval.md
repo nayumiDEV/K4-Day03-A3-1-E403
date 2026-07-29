@@ -15,16 +15,26 @@
 
 ## 🔍 2. SO SÁNH PHẢN HỒI (TEST CASE #3)
 
-**Câu hỏi**: *"Thời tiết ở Hà Nội hôm nay thế nào và tôi nên mặc gì đi chơi?"*
+**Câu hỏi**: *"Tôi là sinh viên năm cuối ngành Hệ thống Thông tin, biết Python và SQL, thích AI. Tôi nên theo Data Analyst hay AI Engineer?"*
 
 ### 🤖 Chatbot Baseline:
-* **Phản hồi**: *"Tôi không có truy cập Internet thời gian thực nên không biết thời tiết hôm nay ở Hà Nội."*
-* **Nhận xét**: An toàn nhưng không giải quyết được nhu cầu thực tế của người dùng.
+* **Phản hồi**: Chatbot trả lời khá đồng cảm, mô tả hai hướng nghề Data Analyst và AI Engineer, sau đó yêu cầu người dùng trả lời 3 câu hỏi bổ sung về sở thích, phong cách làm việc và mức độ thích toán.
+* **Nhận xét**: Phản hồi không bị ảo giác, nhưng chưa đưa ra lời khuyên quyết đoán ngay lập tức. Chatbot chuyển sang thu thập thêm thông tin thay vì tự đoán, nên về mặt an toàn là đúng, nhưng chưa hoàn thành nhiệm vụ tư vấn cá nhân hóa trực tiếp.
 
 ### 🧠 ReAct Agent:
-* **Thought 1**: Cần tra cứu thời tiết Hà Nội.
-* **Action 1**: `get_weather['Hà Nội']`
-* **Observation 1**: `Thời tiết Hà Nội: 28°C, Nắng nhẹ, Độ ẩm 65%.`
-* **Thought 2**: Đã có thông tin 28°C nắng nhẹ, đưa ra lời khuyên trang phục.
-* **Final Answer**: *"Thời tiết Hà Nội hôm nay 28°C, nắng nhẹ. Bạn nên mặc quần áo thoáng mát!"*
-* **Nhận xét**: Hoàn thành xuất sắc nhiệm vụ nhờ sự kết hợp giữa suy luận và công cụ.
+* **Thought 1**: Người dùng đang phân vân giữa hai lộ trình nghề nghiệp là Data Analyst và AI Engineer.
+* **Action 1**: `compare_career_paths["Data Analyst", "AI Engineer", ["Python", "SQL"], ["AI"], "Tìm kiếm hướng đi tối ưu"]`
+* **Observation 1**: JSON trả về so sánh giữa hai nghề; trong đó AI Engineer được đánh giá phù hợp hơn về sở thích AI, còn Data Analyst phù hợp hơn về kỹ năng hiện tại. Kết quả khuyến nghị: `AI Engineer`.
+* **Thought 2**: Đã có đủ thông tin về yêu cầu công việc và kỹ năng hiện tại để so sánh và đưa ra lời khuyên.
+* **Final Answer**: Đưa ra bảng so sánh chi tiết giữa Data Analyst và AI Engineer, nhấn mạnh:
+  - Data Analyst: phù hợp với nền tảng SQL/Python, dễ tiếp cận hơn.
+  - AI Engineer: phù hợp với sở thích AI nhưng cần bù đắp Machine Learning, Deep Learning, Toán và Git.
+
+### 📌 Kết quả so sánh
+* Baseline: Trả lời bằng hướng dẫn chung và hỏi thêm thông tin; chưa quyết định trực tiếp.
+* ReAct Agent: Thực sự sử dụng tool để so sánh hai hướng, rồi tổng hợp thành lời khuyên chi tiết.
+
+### 🔎 Nhận xét
+* ReAct Agent đã đáp ứng đúng mục tiêu Role 1/Role 5: sử dụng `Thought -> Action -> Observation` để hỗ trợ quyết định.
+* Chatbot baseline vẫn đi theo lối đối thoại an toàn, ít tập trung vào tool và chưa đưa ra tư vấn cụ thể ngay lập tức.
+* Không có dấu hiệu ảo giác trong lần chạy; thông tin trả về từ ReAct Agent phù hợp với dữ liệu demo và nhấn mạnh những khoảng trống kỹ năng cần bổ sung.
